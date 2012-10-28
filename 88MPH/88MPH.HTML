@@ -1,0 +1,278 @@
+<html>
+
+	<head>
+	
+		<title>88MPH</title>
+		
+		<style>		
+			@font-face { font-family: DIGI; src:url('FONTS/DIGI.TTF') }			
+					
+			body, #CANVAS, #BG IMG { height:575px; width:1025px; margin: 0px; padding: 0px; }
+			#HIDDEN { display:none; }
+			
+			.R { color: #FF4F06; }
+			.Y { color: #DFA938; }			
+			.G { color: #6BEF57; }
+			
+			#LCD { font-size:109px; font-weight:bold; font-family:DIGI,monospace; }
+			
+			#D_MONTH { font-size:110px; position:absolute; left:059px; top:33px; }
+			#D_DAY   { font-size:107px; position:absolute; left:262px; top:30px; }
+			#D_YEAR  { font-size:110px; position:absolute; left:420px; top:28px; }
+			#D_HOUR  { font-size:105px; position:absolute; left:699px; top:27px; }
+			#D_MIN   { font-size:107px; position:absolute; left:845px; top:27px; }
+
+			#P_MONTH { font-size:110px; position:absolute; left:049px; top:235px; }
+			#P_DAY   { font-size:105px; position:absolute; left:255px; top:237px; }
+			#P_YEAR  { font-size:110px; position:absolute; left:410px; top:233px; }
+			#P_HOUR  { font-size:105px; position:absolute; left:690px; top:235px; }
+			#P_MIN   { font-size:107px; position:absolute; left:840px; top:235px; }
+			
+			#L_MONTH { font-size:110px; position:absolute; left:035px; top:443px; }
+			#L_DAY   { font-size:107px; position:absolute; left:242px; top:440px; }
+			#L_YEAR  { font-size:110px; position:absolute; left:395px; top:438px; }
+			#L_HOUR  { font-size:105px; position:absolute; left:683px; top:439px; }
+			#L_MIN   { font-size:107px; position:absolute; left:830px; top:437px; }
+
+			#D_AM { display:none;position:absolute;top:-24px;left:655px;font-size:99px; }
+			#D_PM { display:none;position:absolute;top:24px;left:655px;font-size:99px; }
+
+			#P_AM { display:none;position:absolute;top:181px;left:649px;font-size:99px; }
+			#P_PM { display:none;position:absolute;top:230px;left:649px;font-size:99px; }
+			
+			#L_AM { display:none;position:absolute;top:388px;left:639px;font-size:99px; }
+			#L_PM { display:none;position:absolute;top:434px;left:639px;font-size:99px; }
+			
+			#BLINK1 { position:absolute;top:190px;left:808px;font-size:99px;display:none; }
+			#BLINK2 { position:absolute;top:213px;left:808px;font-size:99px;display:none; }
+		</style>
+		
+		<script type='text/javascript' src='JS/JQUERY.JS'></script>
+		<script type='text/javascript' src='JS/BUZZ.JS'></script>
+		<script type='text/javascript' src='JS/MOMENT.JS'></script>
+		
+		<script type='text/javascript'>
+			var El = function (id) { return document.getElementById(id); }			
+			var JQ = jQuery.noConflict();
+			var GO = function () { setTimeout(INIT,99); }
+			JQ(document).ready(GO);
+		</script>
+		
+		<script type='text/javascript'>
+
+			var ISPIN = 0;
+			var IBLINK = 0;
+		
+			var INIT = function () {
+				STOPSPIN();
+				
+				clearInterval(ISPIN);
+				clearInterval(IBLINK);
+			
+				buzz.all().stop();
+				
+				PlaySound('SOUNDS/CALCULATIONS',GREATSCOTT);
+				//GREATSCOTT();
+				
+				SPINTIME();
+			};
+			
+			var RMIN = moment('1776-01-01 00:01').unix();
+			var RMAX = moment('2199-12-31 23:59').unix();
+			var R = function (lo,hi) { 
+				if (!lo) { lo=RMIN; } if (!hi) { hi=RMAX; }
+				return Math.floor(Math.random()*(hi-lo+1))+lo; 
+			}
+			
+			var SPINTIME = function () {
+				ISPIN = setInterval(function () {
+					SetTime('D',moment.unix(R()));
+					SetTime('P',moment.unix(R()));
+					SetTime('L',moment.unix(R()));
+				},50);
+			};
+			
+			var STOPSPIN = function () {
+				clearInterval(ISPIN);
+			};
+
+			var SPINTIME_D = function () {
+				ISPIN = setInterval(function () {
+					SetTime('D',moment.unix(R()));
+				},50);
+			};		
+			
+			var BLINKER = function () {
+				SetTime('P',moment());
+				JQ('.BLINKER').show();
+				setTimeout(function () { JQ('.BLINKER').hide(); },420);			
+			};
+			
+			var GREATSCOTT = function () {
+				STOPSPIN();
+				ClearP();
+			
+				SetTime('D','1999-12-31T23:59');
+				SetTime('L','2099-04-20T19:10');			
+				
+				BLINKER(); IBLINK = setInterval(BLINKER,1000);
+				PlaySound('SOUNDS/CIRCUITSON', function () { setTimeout(function () { PlaySound('SOUNDS/ROADS'); },420); } );
+			};
+			
+			var HandleClick = function (x) {
+				switch (x) {
+					case 'RELOAD':
+						INIT();
+						//window.location.reload();
+						break;
+												
+					case 'PLAY_BACKFUTURE':
+						PlaySound('SOUNDS/BACKFUTURE');
+						break;
+						
+					case 'PLAY_GREATSCOTT':
+						PlaySound('SOUNDS/GREATSCOTT');
+						break;
+						
+					case 'PLAY_GIGAWATTS':
+						PlaySound('SOUNDS/GIGAWATTS');
+						break;						
+						
+					case 'PLAY_ROADS':
+						PlaySound('SOUNDS/ROADS');
+						break;
+						
+					case 'PLAY_CIRCUITSON':
+						PlaySound('SOUNDS/CIRCUITSON');
+						break;
+							
+					case 'SPINTIME_D':
+						SPINTIME_D();
+						setTimeout(STOPSPIN,3333);
+						break;
+				}
+			};
+			
+			var PlaySound = function (file,cb) { 		
+				if (!cb) { cb = function () {}; }			
+				var sound = new buzz.sound(file,{formats:['MP3']});
+				sound.play().bind('ended',cb);
+			};
+			
+			var SetTime = function (x,v) {			
+				
+				var d = 0;
+				
+				if (typeof(v)=='string') {
+					d = moment(v);
+				} else { 
+					d = v; 
+				}
+				
+				switch (x) {
+					case 'D':
+						JQ('#D_MONTH').html( d.format('MMM') );
+						JQ('#D_DAY')  .html( d.format('DD') );
+						JQ('#D_YEAR') .html( d.format('YYYY') );
+						JQ('#D_HOUR') .html( d.format('hh') );
+						JQ('#D_MIN')  .html( d.format('mm') );
+						if (d.format('A')=='AM') { JQ('#D_AM').show(); JQ('#D_PM').hide(); }
+						if (d.format('A')=='PM') { JQ('#D_PM').show(); JQ('#D_AM').hide(); }
+						break;
+						
+					case 'P':
+						JQ('#P_MONTH').html( d.format('MMM') );
+						JQ('#P_DAY')  .html( d.format('DD') );
+						JQ('#P_YEAR') .html( d.format('YYYY') );
+						JQ('#P_HOUR') .html( d.format('hh') );
+						JQ('#P_MIN')  .html( d.format('mm') );
+						if (d.format('A')=='AM') { JQ('#P_AM').show(); JQ('#P_PM').hide(); }
+						if (d.format('A')=='PM') { JQ('#P_PM').show(); JQ('#P_AM').hide(); }
+						break;
+						
+					case 'L':
+						JQ('#L_MONTH').html( d.format('MMM') );
+						JQ('#L_DAY')  .html( d.format('DD') );
+						JQ('#L_YEAR') .html( d.format('YYYY') );
+						JQ('#L_HOUR') .html( d.format('hh') );
+						JQ('#L_MIN')  .html( d.format('mm') );
+						if (d.format('A')=='AM') { JQ('#L_AM').show(); JQ('#L_PM').hide(); }
+						if (d.format('A')=='PM') { JQ('#L_PM').show(); JQ('#L_AM').hide(); }
+						break;						
+				}			
+			};
+			
+			var ClearP = function () {
+				JQ('#P_MONTH').html( '' );
+				JQ('#P_DAY')  .html( '' );
+				JQ('#P_YEAR') .html( '' );
+				JQ('#P_HOUR') .html( '' );
+				JQ('#P_MIN')  .html( '' );				
+			};
+			
+		</script>		
+		
+	</head>
+	
+	<body>
+		<div id='CANVAS'>
+					
+			<div id='BG'>
+				<img id='PANEL' src='IMG/PANELBLANK.PNG'>
+			</div>			
+			
+			<div id='LCD'>			
+			
+				<div id='D' class='R' onclick="HandleClick('SPINTIME_D')">
+					<div id='D_MONTH'></div>
+					<div id='D_DAY'></div>
+					<div id='D_YEAR'></div>
+					<div id='D_HOUR'></div>
+					<div id='D_MIN'></div>
+				</div>
+				
+				<div id='P' class='G' onclick="HandleClick('RELOAD')">
+					<div id='P_MONTH'></div>
+					<div id='P_DAY'></div>
+					<div id='P_YEAR'></div>
+					<div id='P_HOUR'></div>
+					<div id='P_MIN'></div>
+				</div>
+				
+				<div id='L' class='Y'>
+					<div id='L_MONTH' onclick="HandleClick('PLAY_CIRCUITSON')"></div>
+					<div id='L_DAY'   onclick="HandleClick('PLAY_GREATSCOTT')"></div>
+					<div id='L_YEAR'  onclick="HandleClick('PLAY_BACKFUTURE')"></div>
+					<div id='L_HOUR'  onclick="HandleClick('PLAY_GIGAWATTS')"></div>
+					<div id='L_MIN'   onclick="HandleClick('PLAY_ROADS')"></div>				
+				</div>										
+				
+			</div>
+			
+			<div id='LED'>
+				<div id='D_AM' class='R'>.</div>
+				<div id='D_PM' class='R'>.</div>
+
+				<div id='P_AM' class='G'>.</div>
+				<div id='P_PM' class='G'>.</div>
+				
+				<div id='L_AM' class='Y'>.</div>
+				<div id='L_PM' class='Y'>.</div>
+				
+				<div id='BLINK1' class='G BLINKER'>.</div>
+				<div id='BLINK2' class='G BLINKER'>.</div>	
+			</div>
+			
+		</div>
+
+		<div id='HIDDEN' style='display:none'>
+			<audio preload='auto' src='SOUNDS/BACKFUTURE.MP3'></audio>
+			<audio preload='auto' src='SOUNDS/CALCULATIONS.MP3'></audio>
+			<audio preload='auto' src='SOUNDS/CIRCUITSON.MP3'></audio>
+			<audio preload='auto' src='SOUNDS/GIGAWATTS.MP3'></audio>
+			<audio preload='auto' src='SOUNDS/GREATSCOTT.MP3'></audio>
+			<audio preload='auto' src='SOUNDS/ROADS.MP3'></audio>			
+		</div>		
+	</body>
+	
+</html>
